@@ -6,7 +6,7 @@
 
 cmake_minimum_required(VERSION 3.16) #Oldest version it was tested with.
 
-project(NadirExample DESCRIPTION "Strategy pattern optimiser with compile-time linear regression.")
+project(NadirExample DESCRIPTION "Example of how to use Nadir.")
 
 #Find the files of the actual project.
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
@@ -15,4 +15,5 @@ set(project_sources
 )
 
 #To create benchmarks to optimise for, we build a benchmarker application that will write a file of measurements.
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../include") #Include Nadir. Normally you'd use CPack or a find module for this.
 add_executable(benchmarker benchmarker.cpp ${project_sources})

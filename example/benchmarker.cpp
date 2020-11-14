@@ -8,8 +8,10 @@
 
 #include <iostream>
 
+#include <nadir/nadir.hpp>
 #include "sort.hpp"
 
 int main() {
+	nadir::Benchmarker benchmarker;
 	return 0;
 }
