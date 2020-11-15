@@ -42,6 +42,16 @@ public:
 		options.push_back(experiment);
 	}
 
+protected:
+	/*!
+	 * The list of options for the strategy pattern to choose from.
+	 *
+	 * The benchmark will be ran for each of these options in order to get
+	 * comparative results.
+	 */
+	std::vector<std::function<void(Param...)>> options;
+};
+
 }
 
 #endif
