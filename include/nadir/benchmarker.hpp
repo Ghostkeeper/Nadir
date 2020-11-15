@@ -23,7 +23,9 @@ namespace nadir {
  * This class allows the user of the Nadir library to create a benchmarking
  * application with relative ease.
  * \tparam Param A list of parameters. Any number of parameters is allowed. All
- * parameters must be serialisable to a file stream.
+ * parameters must be serialisable to a file stream. Enum parameters must have a
+ * member called ``COUNT`` and be integral type without specialised values, so
+ * that the benchmarker can determine the possible options of the enum type.
  */
 template<typename... Param>
 class Benchmarker {
@@ -122,13 +124,43 @@ protected:
 	}
 
 	/*!
-	 * Default range of parameters to test for size_t parameters.
+	 * Default range of parameters to test for ``size_t`` parameters.
 	 * \param range A range of size_t parameters to experiment. This vector will
 	 * be modified in-place.
 	 */
 	void fill_default_range(std::vector<size_t>& range) {
 		range.clear();
 		range.insert(range.end(), {0, 1, 5, 10, 25, 50, 100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000, 2500000, 5000000, 10000000});
+	}
+
+	/*!
+	 * Default range of parameters to test for enumerable parameters.
+	 *
+	 * To be able to determine all of the enumerable parameters, the enum MUST
+	 * be integral and MUST have a field called ``COUNT`` at the end.
+	 *
+	 * This is an example of a correctly defined enum:
+	 *
+	 * ``enum Direction { East, North, West, South, COUNT };``
+	 *
+	 * This is an example of an incorrectly defined enum, since it's missing the
+	 * ``COUNT`` member. It will give a compilation error:
+	 *
+	 * ``enum Direction { East, North, West, South };``
+	 *
+	 * This is an example of an incorrectly defined enum, since one of the
+	 * members has a value. It will not give a compilation error, but the member
+	 * with a value will be skipped:
+	 *
+	 * ``enum Direction { East, North = 125, West, South, COUNT };``
+	 */
+	template<typename EnumType>
+	typename std::enable_if<std::is_enum<EnumType>::value, void>::type fill_default_range(std::vector<EnumType>& range) {
+		range.clear();
+		range.reserve(EnumType::COUNT); //Enums MUST have a field called COUNT at the end, so that we can determine how many options the enum provides.
+		for(int t = 0; t < EnumType::COUNT; ++t) {
+			range.push_back(t);
+		}
 	}
 };
 
