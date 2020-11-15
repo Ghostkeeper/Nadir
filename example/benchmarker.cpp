@@ -10,29 +10,32 @@
 #include <nadir/nadir.hpp>
 #include "sort.hpp"
 
+/*!
+ * Helper function to create input test data for the sort functions.
+ * \param problem_size How many items to put in the input problem.
+ */
+std::vector<int> test_data(const size_t problem_size) {
+	//Create a random problem, but with a fixed seed so every experiment is the same and fair.
+	std::mt19937 rng(1337);
+	std::vector<int> test;
+	test.reserve(problem_size);
+	for(size_t i = 0; i < problem_size; ++i) {
+		test.push_back(rng());
+	}
+	return test;
+}
+
 int main() {
 	//Create benchmarks with 1 parameter: The size of the data set to sort.
 	nadir::Benchmarker<size_t> benchmarker;
 	benchmarker.add_option("sort_n2", [](size_t problem_size){
-		//Create a random problem, but with a fixed seed so every experiment is the same and fair.
-		std::mt19937 rng(1337);
-		std::vector<int> input;
-		input.reserve(problem_size);
-		for(size_t i = 0; i < problem_size; ++i) {
-			input.push_back(rng());
-		}
-
+		std::vector<int> input = test_data(problem_size);
 		//Execute the code under test.
 		//TODO: Ideally we only want to time this part.
 		example::sort_n2(input);
 	});
 	benchmarker.add_option("sort_nlogn", [](size_t problem_size){
-		std::mt19937 rng(1337);
-		std::vector<int> input;
-		input.reserve(problem_size);
-		for(size_t i = 0; i < problem_size; ++i) {
-			input.push_back(rng());
-		}
+		std::vector<int> input = test_data(problem_size);
 
 		example::sort_nlogn(input);
 	});
