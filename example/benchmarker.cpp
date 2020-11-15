@@ -36,5 +36,7 @@ int main() {
 
 		example::sort_nlogn(input);
 	});
+
+	benchmarker.run("sort_benchmarks.hpp");
 	return 0;
 }
