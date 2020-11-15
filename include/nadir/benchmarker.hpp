@@ -158,6 +158,9 @@ protected:
 	 * with a value will be skipped:
 	 *
 	 * ``enum Direction { East, North = 125, West, South, COUNT };``
+	 * \tparam EnumType This function can generate a range for any enum.
+	 * \param range A range of enum parameters to experiment. This fector will
+	 * be modified in-place.
 	 */
 	template<typename EnumType>
 	typename std::enable_if<std::is_enum<EnumType>::value, void>::type fill_default_range(std::vector<EnumType>& range) {
