@@ -40,8 +40,8 @@ public:
 	 * can be a lambda function. The experiment must take the appropriate set of
 	 * parameters.
 	 */
-	void add_option(const std::string identifier, std::function<void(Param...)> experiment) {
-		options.push_back(experiment);
+	void add_option(const std::string& identifier, std::function<void(Param...)> experiment) {
+		options.emplace_back(identifier, experiment);
 	}
 
 	/*!
@@ -66,8 +66,9 @@ protected:
 	 *
 	 * The benchmark will be ran for each of these options in order to get
 	 * comparative results.
+	 * Each option consists of an identifier (string) and an experiment to run.
 	 */
-	std::vector<std::function<void(Param...)>> options;
+	std::vector<std::pair<std::string, std::function<void(Param...)>>> options;
 
 	/*!
 	 * For each parameter, a list of values to test.
