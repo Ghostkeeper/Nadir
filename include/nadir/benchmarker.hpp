@@ -9,8 +9,6 @@
 #ifndef NADIR_BENCHMARKER
 #define NADIR_BENCHMARKER
 
-#include<iostream> //DEBUG
-
 #include <fstream> //To write the benchmark data to file.
 #include <functional> //To register functions to be tested.
 #include <stdlib.h> //For exit() in case an error occurs.
@@ -158,8 +156,8 @@ protected:
 	typename std::enable_if<std::is_enum<EnumType>::value, void>::type fill_default_range(std::vector<EnumType>& range) {
 		range.clear();
 		range.reserve(EnumType::COUNT); //Enums MUST have a field called COUNT at the end, so that we can determine how many options the enum provides.
-		for(int t = 0; t < EnumType::COUNT; ++t) {
-			range.push_back(t);
+		for(unsigned int i = 0; i < EnumType::COUNT; ++i) {
+			range.push_back(EnumType(i));
 		}
 	}
 };
