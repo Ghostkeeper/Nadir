@@ -27,17 +27,17 @@ std::vector<int> test_data(const size_t problem_size) {
 
 int main() {
 	//Create benchmarks with 1 parameter: The size of the data set to sort.
-	nadir::Benchmarker<size_t> benchmarker;
-	benchmarker.add_option("sort_n2", [](size_t problem_size){
+	nadir::Benchmarker<size_t, example::SortDirection> benchmarker;
+	benchmarker.add_option("sort_n2", [](const size_t problem_size, const example::SortDirection direction){
 		std::vector<int> input = test_data(problem_size);
 		//Execute the code under test.
 		//TODO: Ideally we only want to time this part.
-		example::sort_n2(input);
+		example::sort_n2(input, direction);
 	});
-	benchmarker.add_option("sort_nlogn", [](size_t problem_size){
+	benchmarker.add_option("sort_nlogn", [](const size_t problem_size, const example::SortDirection direction){
 		std::vector<int> input = test_data(problem_size);
 
-		example::sort_nlogn(input);
+		example::sort_nlogn(input, direction);
 	});
 
 	benchmarker.run("sort_benchmarks.hpp");

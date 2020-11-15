@@ -13,13 +13,15 @@
 
 namespace example {
 
+enum SortDirection { Forward, Backward, COUNT };
+
 /*!
  * This is a sorting function that is expected to be more efficient with large
  * data sets, while it may be less efficient with small data sets.
  * \param input A list of numbers that needs to be sorted.
  * \return A sorted list of numbers.
  */
-std::vector<int> sort_nlogn(const std::vector<int>& input);
+std::vector<int> sort_nlogn(const std::vector<int>& input, const SortDirection direction);
 
 /*!
  * This is a sorting function that is expected to be more efficient with small
@@ -27,7 +29,7 @@ std::vector<int> sort_nlogn(const std::vector<int>& input);
  * \param input A list of numbers that needs to be sorted.
  * \return A sorted list of numbers.
  */
-std::vector<int> sort_n2(const std::vector<int>& input);
+std::vector<int> sort_n2(const std::vector<int>& input, const SortDirection direction);
 
 }
 
