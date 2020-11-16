@@ -9,6 +9,7 @@
 #ifndef NADIR_BENCHMARKER
 #define NADIR_BENCHMARKER
 
+#include <chrono> //To measure execution time.
 #include <fstream> //To write the benchmark data to file.
 #include <functional> //To register functions to be tested.
 #include <stdlib.h> //For exit() in case an error occurs.
@@ -254,7 +255,12 @@ protected:
 	 */
 	template<size_t I = 0, typename... RemainingParams, size_t... Is>
 	typename std::enable_if<I == sizeof...(Param), void>::type experiment_combinations(const std::string& identifier, const std::function<void(Param...)> experiment, std::tuple<Param...>& param_values, std::index_sequence<Is...>) {
+		std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 		experiment(std::get<Is>(param_values)...);
+		std::chrono::time_point end = std::chrono::high_resolution_clock::now();
+
+		std::chrono::duration<double> duration = end - start;
+		output_file << duration.count() << ", ";
 	}
 };
 
