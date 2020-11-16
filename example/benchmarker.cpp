@@ -5,6 +5,7 @@
  * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for details.
  * You should have received a copy of the GNU Affero General Public License along with this library. If not, see <https://gnu.org/licenses/>.
  */
+#include <iostream>
 
 #include <random>
 #include <nadir/nadir.hpp>
@@ -29,17 +30,19 @@ int main() {
 	//Create benchmarks with 1 parameter: The size of the data set to sort.
 	nadir::Benchmarker<size_t, example::SortDirection> benchmarker;
 	benchmarker.add_option("sort_n2", [](const size_t problem_size, const example::SortDirection direction){
+		std::cout << "sort_n2(" << problem_size << ", " << direction << ")" << std::endl;
 		std::vector<int> input = test_data(problem_size);
 		//Execute the code under test.
 		//TODO: Ideally we only want to time this part.
 		example::sort_n2(input, direction);
 	});
 	benchmarker.add_option("sort_nlogn", [](const size_t problem_size, const example::SortDirection direction){
+		std::cout << "sort_nlogn(" << problem_size << ", " << direction << ")" << std::endl;
 		std::vector<int> input = test_data(problem_size);
 
 		example::sort_nlogn(input, direction);
 	});
 
-	benchmarker.run("sort_benchmarks.hpp");
+	benchmarker.run();
 	return 0;
 }
