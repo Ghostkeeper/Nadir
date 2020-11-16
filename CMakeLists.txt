@@ -15,4 +15,4 @@ project(Nadir VERSION ${NADIR_VERSION_MAJOR}.${NADIR_VERSION_MINOR}.${NADIR_VERS
 #The main target.
 add_library(nadir INTERFACE)
 target_include_directories(nadir INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set_property(TARGET nadir PROPERTY CXX_STANDARD 17)
+set_property(TARGET nadir PROPERTY CXX_STANDARD 20)
