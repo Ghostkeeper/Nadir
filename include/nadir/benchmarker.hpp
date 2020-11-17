@@ -79,11 +79,14 @@ public:
 		for(const std::pair<std::string, std::function<void(Param...)>>& option : options) {
 			const std::string& identifier = option.first;
 			const std::function<void(Param...)> experiment = option.second;
+
+			output_file << "\t{\"" << identifier << "\", {\n";
 			std::tuple<Param...> values;
 			experiment_combinations<0, Param...>(identifier, experiment, values, std::index_sequence_for<Param...>{});
+			output_file << "\t}},\n";
 		}
 
-		output_file << "};\n"; //nadir_measurements end.
+		output_file << "};\n"; //measurements end.
 		output_file << "\n}"; //Namespace end.
 		output_file.close();
 	}
@@ -205,7 +208,7 @@ protected:
 	/*!
 	 * Print the type of parameter used in this parameter range to the output
 	 * file.
-	 * \param range A range of parameters to test with.
+	 * \param range A range of parameter values to test with, of a certain type.
 	 */
 	template<typename ParamType>
 	void print_parameter_type(std::vector<ParamType>& range) {
@@ -216,6 +219,17 @@ protected:
 		} else {
 			exit(2); //Parameter type is not supported. Should never happen because this gives a compilation warning due to not having a default range. Is this function updated too?
 		}
+	}
+
+	template<size_t I = 0>
+	typename std::enable_if<I < sizeof...(Param), void>::type print_parameters(const std::tuple<Param...>& parameters) {
+		output_file << std::get<I>(parameters) << ", ";
+		print_parameters<I + 1>(parameters);
+	}
+
+	template<size_t I = 0>
+	typename std::enable_if<I == sizeof...(Param), void>::type print_parameters(const std::tuple<Param...>& parameters) {
+		//End of iteration over tuple. Base case of the recursion.
 	}
 
 	/*!
@@ -280,7 +294,10 @@ protected:
 		std::chrono::time_point end = std::chrono::high_resolution_clock::now();
 
 		std::chrono::duration<double> duration = end - start;
-		output_file << duration.count() << ", ";
+		output_file << "\t\t{";
+		print_parameters<0>(param_values);
+		output_file << duration.count();
+		output_file << "},\n";
 	}
 };
 
