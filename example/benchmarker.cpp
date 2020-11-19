@@ -39,6 +39,7 @@ int main() {
 	});
 
 	benchmarker.repeats = 5;
+	benchmarker.set_param_range<0>(std::vector<size_t>({0, 1, 5, 10, 50, 100, 500, 1000, 5000, 10000}));
 	benchmarker.run();
 	return 0;
 }

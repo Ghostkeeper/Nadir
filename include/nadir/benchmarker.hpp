@@ -85,6 +85,24 @@ public:
 	}
 
 	/*!
+	 * Change which parameter values the benchmarker will test with.
+	 *
+	 * Each parameter gets executed with a predefined default set of parameter
+	 * values. However if you want to customise this you can provide a custom
+	 * range in the form of a vector of values.
+	 * \tparam ParamNr The index of the parameter to change, in the same order
+	 * as how the template arguments of the ``Benchmarker`` class are provided.
+	 * \tparam ThisParam Automatically filled in parameter type to change the
+	 * range for. You shouldn't need to provide this due to template argument
+	 * deduction.
+	 * \param Range the new range of parameter values to test with.
+	 */
+	template<size_t ParamNr, typename ThisParam>
+	void set_param_range(const std::vector<ThisParam>& range) {
+		std::get<ParamNr>(param_ranges) = range;
+	}
+
+	/*!
 	 * Run the benchmarks and save the results in the specified file name.
 	 */
 	void run() {
