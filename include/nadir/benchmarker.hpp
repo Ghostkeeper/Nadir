@@ -37,6 +37,12 @@ public:
 	 *
 	 * More repeats make the measurements more accurate, but also take more time
 	 * to execute.
+	 *
+	 * Aside from these, every experiment will also be ran once extra in order
+	 * to warm up the processor and seed the branch prediction. This extra run
+	 * is not benchmarked, but required to get reliable test results. If your
+	 * experiment has any side effects, you can expect those side effects to
+	 * occur once too many.
 	 */
 	size_t repeats = 10;
 
@@ -311,6 +317,7 @@ protected:
 	template<size_t I = 0, typename... RemainingParams, size_t... Is>
 	typename std::enable_if<I == sizeof...(Param), void>::type experiment_combinations(const std::string& identifier, const std::function<std::any(Param...)> setup, const std::function<void(std::any, Param...)> experiment, std::tuple<Param...>& param_values, std::index_sequence<Is...>) {
 		std::any input_data = setup(std::get<Is>(param_values)...);
+		experiment(input_data, std::get<Is>(param_values)...); //Warm up the processor, so to say. Helps to pre-allocate memory as well as to seed the weights of branch prediction.
 		std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 		for(size_t repeat = 0; repeat < repeats; ++repeat) {
 			experiment(input_data, std::get<Is>(param_values)...);
