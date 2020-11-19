@@ -38,7 +38,7 @@ int main() {
 		example::sort_nlogn(std::any_cast<std::vector<int>>(input), direction);
 	});
 
-	benchmarker.repeats = 5;
+	benchmarker.repeats = 100;
 	benchmarker.set_param_range<0>(std::vector<size_t>({0, 1, 5, 10, 50, 100, 500, 1000, 5000, 10000}));
 	benchmarker.run();
 	return 0;
