@@ -15,7 +15,7 @@
  * Helper function to create input test data for the sort functions.
  * \param problem_size How many items to put in the input problem.
  */
-std::vector<int> test_data(const size_t problem_size) {
+std::any test_data(const size_t problem_size, const example::SortDirection direction) {
 	//Create a random problem, but with a fixed seed so every experiment is the same and fair.
 	std::mt19937 rng(1337);
 	std::vector<int> test;
@@ -29,18 +29,13 @@ std::vector<int> test_data(const size_t problem_size) {
 int main() {
 	//Create benchmarks with 1 parameter: The size of the data set to sort.
 	nadir::Benchmarker<size_t, example::SortDirection> benchmarker;
-	benchmarker.add_option("sort_n2", [](const size_t problem_size, const example::SortDirection direction){
+	benchmarker.add_option("sort_n2", test_data, [](std::any input, const size_t problem_size, const example::SortDirection direction){
 		std::cout << "sort_n2(" << problem_size << ", " << direction << ")" << std::endl;
-		std::vector<int> input = test_data(problem_size);
-		//Execute the code under test.
-		//TODO: Ideally we only want to time this part.
-		example::sort_n2(input, direction);
+		example::sort_n2(std::any_cast<std::vector<int>>(input), direction);
 	});
-	benchmarker.add_option("sort_nlogn", [](const size_t problem_size, const example::SortDirection direction){
+	benchmarker.add_option("sort_nlogn", test_data, [](std::any input, const size_t problem_size, const example::SortDirection direction){
 		std::cout << "sort_nlogn(" << problem_size << ", " << direction << ")" << std::endl;
-		std::vector<int> input = test_data(problem_size);
-
-		example::sort_nlogn(input, direction);
+		example::sort_nlogn(std::any_cast<std::vector<int>>(input), direction);
 	});
 
 	benchmarker.repeats = 5;

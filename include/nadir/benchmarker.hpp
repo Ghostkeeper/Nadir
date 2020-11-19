@@ -9,6 +9,7 @@
 #ifndef NADIR_BENCHMARKER
 #define NADIR_BENCHMARKER
 
+#include <any> //To allow the prepared test input data to have any data type.
 #include <chrono> //To measure execution time.
 #include <fstream> //To write the benchmark data to file.
 #include <functional> //To register functions to be tested.
@@ -62,12 +63,19 @@ public:
 	 * The output of Nadir will be one of these identifiers so that your code
 	 * can know which algorithm to run. It will also be used to store the
 	 * benchmark data in the generated data header.
+	 * \param setup A function to execute for setting up some data for the
+	 * algorithm under scrutiny to work on. For instance you could generate an
+	 * input data set of the correct size. This can return any one object. The
+	 * returned object is passed as the first argument of the experiment.
 	 * \param experiment An experiment to run to benchmark the algorithm. This
-	 * can be a lambda function. The experiment must take the appropriate set of
-	 * parameters.
+	 * can be a lambda function that runs the experiment. The experiment will be
+	 * given the output of the setup function as first parameter, and the set of
+	 * variation parameters as the rest of the parameters. This function will be
+	 * benchmarked, so any unpacking of the parameters should be as lean as
+	 * possible.
 	 */
-	void add_option(const std::string& identifier, std::function<void(Param...)> experiment) {
-		options.emplace_back(identifier, experiment);
+	void add_option(const std::string& identifier, std::function<std::any(Param...)> setup, std::function<void(std::any, Param...)> experiment) {
+		options.emplace_back(identifier, setup, experiment);
 	}
 
 	/*!
@@ -84,13 +92,14 @@ public:
 		}, param_ranges);
 		output_file << "double>, " << num_measurements << ">> measurements = {\n"; //Measurements are in seconds, floating-point.
 
-		for(const std::pair<std::string, std::function<void(Param...)>>& option : options) {
-			const std::string& identifier = option.first;
-			const std::function<void(Param...)> experiment = option.second;
+		for(const std::tuple<std::string, std::function<std::any(Param...)>, std::function<void(std::any, Param...)>>& option : options) {
+			const std::string& identifier = std::get<0>(option);
+			const std::function<std::any(Param...)> setup = std::get<1>(option);
+			const std::function<void(std::any, Param...)> experiment = std::get<2>(option);
 
 			output_file << "\t{\"" << identifier << "\", {\n";
 			std::tuple<Param...> values;
-			experiment_combinations<0, Param...>(identifier, experiment, values, std::index_sequence_for<Param...>{});
+			experiment_combinations<0, Param...>(identifier, setup, experiment, values, std::index_sequence_for<Param...>{});
 			output_file << "\t}},\n";
 		}
 
@@ -117,7 +126,7 @@ protected:
 	 * comparative results.
 	 * Each option consists of an identifier (string) and an experiment to run.
 	 */
-	std::vector<std::pair<std::string, std::function<void(Param...)>>> options;
+	std::vector<std::tuple<std::string, std::function<std::any(Param...)>, std::function<void(std::any, Param...)>>> options;
 
 	/*!
 	 * For each parameter, a list of values to test.
@@ -263,16 +272,18 @@ protected:
 	 * \param identifier The identifier for the option we're running the
 	 * experiment for. This is necessary to write the results to the output
 	 * file.
+	 * \param setup The setup function for the experiment to pre-generate some
+	 * data that is not under test.
 	 * \param experiment The function to benchmark for the actual experiment.
 	 * \param param_values A tuple to fill with parameter values. When calling
 	 * this function, you can leave the values uninitialised.
 	 */
 	template<size_t I = 0, typename ThisParam, typename... RemainingParams, size_t... Is>
-	typename std::enable_if<I < sizeof...(Param), void>::type experiment_combinations(const std::string& identifier, const std::function<void(Param...)> experiment, std::tuple<Param...>& param_values, std::index_sequence<Is...>) {
+	typename std::enable_if<I < sizeof...(Param), void>::type experiment_combinations(const std::string& identifier, const std::function<std::any(Param...)> setup, const std::function<void(std::any, Param...)> experiment, std::tuple<Param...>& param_values, std::index_sequence<Is...>) {
 		const std::vector<ThisParam>& range = std::get<I>(param_ranges);
 		for(const ThisParam& parameter : range) { //Test each value from the range of values for this parameter.
 			std::get<I>(param_values) = parameter;
-			experiment_combinations<I + 1, RemainingParams...>(identifier, experiment, param_values, std::index_sequence_for<Param...>{});
+			experiment_combinations<I + 1, RemainingParams...>(identifier, setup, experiment, param_values, std::index_sequence_for<Param...>{});
 		}
 	}
 
@@ -292,14 +303,17 @@ protected:
 	 * \param identifier The identifier for the option we're running the
 	 * experiment for. This is necessary to write the results to the output
 	 * file.
+	 * \param setup The setup function for the experiment to pre-generate some
+	 * data that is not under test.
 	 * \param experiment The function to benchmark for the actual experiment.
 	 * \param param_values The parameter values to run the experiment with.
 	 */
 	template<size_t I = 0, typename... RemainingParams, size_t... Is>
-	typename std::enable_if<I == sizeof...(Param), void>::type experiment_combinations(const std::string& identifier, const std::function<void(Param...)> experiment, std::tuple<Param...>& param_values, std::index_sequence<Is...>) {
+	typename std::enable_if<I == sizeof...(Param), void>::type experiment_combinations(const std::string& identifier, const std::function<std::any(Param...)> setup, const std::function<void(std::any, Param...)> experiment, std::tuple<Param...>& param_values, std::index_sequence<Is...>) {
+		std::any input_data = setup(std::get<Is>(param_values)...);
 		std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 		for(size_t repeat = 0; repeat < repeats; ++repeat) {
-			experiment(std::get<Is>(param_values)...);
+			experiment(input_data, std::get<Is>(param_values)...);
 		}
 		std::chrono::time_point end = std::chrono::high_resolution_clock::now();
 
