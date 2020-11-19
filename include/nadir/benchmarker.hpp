@@ -32,6 +32,14 @@ template<typename... Param>
 class Benchmarker {
 public:
 	/*!
+	 * How often to repeat each experiment.
+	 *
+	 * More repeats make the measurements more accurate, but also take more time
+	 * to execute.
+	 */
+	size_t repeats = 10;
+
+	/*!
 	 * Construct a new benchmark for a certain problem which might have multiple
 	 * algorithms to solve.
 	 */
@@ -290,10 +298,12 @@ protected:
 	template<size_t I = 0, typename... RemainingParams, size_t... Is>
 	typename std::enable_if<I == sizeof...(Param), void>::type experiment_combinations(const std::string& identifier, const std::function<void(Param...)> experiment, std::tuple<Param...>& param_values, std::index_sequence<Is...>) {
 		std::chrono::time_point start = std::chrono::high_resolution_clock::now();
-		experiment(std::get<Is>(param_values)...);
+		for(size_t repeat = 0; repeat < repeats; ++repeat) {
+			experiment(std::get<Is>(param_values)...);
+		}
 		std::chrono::time_point end = std::chrono::high_resolution_clock::now();
 
-		std::chrono::duration<double> duration = end - start;
+		std::chrono::duration<double> duration = (end - start) / repeats;
 		output_file << "\t\t{";
 		print_parameters<0>(param_values);
 		output_file << duration.count();

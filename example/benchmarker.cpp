@@ -43,6 +43,7 @@ int main() {
 		example::sort_nlogn(input, direction);
 	});
 
+	benchmarker.repeats = 5;
 	benchmarker.run();
 	return 0;
 }
