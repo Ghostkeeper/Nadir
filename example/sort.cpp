@@ -10,13 +10,29 @@
 #define SORT
 
 #include <algorithm> //For std::sort.
+#include <list> //An intentionally slower method of storing data.
 #include "sort.hpp"
 
 namespace example {
 
 std::vector<int> sort_nlogn(const std::vector<int>& input, const SortDirection direction) {
-	std::vector<int> result = input; //Make a copy as to not modify the input.
-	std::sort(result.begin(), result.end());
+	//This is an INTENTIONALLY SLOWER sort.
+	//It's slowed down by copying the data to a linked list.
+	//Linked lists are generally slower, and the sorting of linked lists likewise.
+	//What's more, this involves a lot of copying back and forth.
+	//This is necessary to allow the n2 algorithm to beat it at low sizes, for demonstration.
+	//It would otherwise be pretty darn difficult to beat std::sort even at low sizes.
+	std::list<int> list;
+	for(const int& number : input) {
+		list.push_back(number);
+	}
+
+	list.sort();
+
+	std::vector<int> result;
+	for(const int& number : list) {
+		result.push_back(number);
+	}
 	if(direction == SortDirection::Backward) {
 		std::reverse(result.begin(), result.end());
 	}
