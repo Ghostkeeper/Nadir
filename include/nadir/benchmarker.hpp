@@ -110,21 +110,19 @@ public:
 		output_file << "namespace nadir {\n\n";
 
 		//Declare the table of measurements of the correct size.
-		output_file << "constexpr std::unordered_map<std::string, std::array<std::tuple<"; //Mapping option identifier to an array of measurements. Each measurement is a tuple of all parameters and a duration.
+		output_file << "constexpr std::array<std::tuple<std::string, "; //Mapping option identifier to an array of measurements. Each measurement is a tuple of all parameters and a duration.
 		std::apply([this](auto&&... ranges) {
 			((this->print_parameter_type(ranges)), ...);
 		}, param_ranges);
-		output_file << "double>, " << num_measurements << ">> measurements = {\n"; //Measurements are in seconds, floating-point.
+		output_file << "double>, " << num_measurements * options.size() << "> measurements = {\n"; //Measurements are in seconds, floating-point.
 
 		for(const std::tuple<std::string, std::function<std::any(Param...)>, std::function<void(std::any, Param...)>>& option : options) {
 			const std::string& identifier = std::get<0>(option);
 			const std::function<std::any(Param...)> setup = std::get<1>(option);
 			const std::function<void(std::any, Param...)> experiment = std::get<2>(option);
 
-			output_file << "\t{\"" << identifier << "\", {\n";
 			std::tuple<Param...> values;
 			experiment_combinations<0, Param...>(identifier, setup, experiment, values, std::index_sequence_for<Param...>{});
-			output_file << "\t}},\n";
 		}
 
 		output_file << "};\n"; //measurements end.
@@ -343,7 +341,8 @@ protected:
 		std::chrono::time_point end = std::chrono::high_resolution_clock::now();
 
 		std::chrono::duration<double> duration = (end - start) / repeats;
-		output_file << "\t\t{";
+		output_file << "\t{";
+		output_file << identifier << ", ";
 		print_parameters<0>(param_values);
 		output_file << duration.count();
 		output_file << "},\n";
