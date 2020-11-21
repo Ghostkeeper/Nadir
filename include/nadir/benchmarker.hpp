@@ -342,7 +342,7 @@ protected:
 
 		std::chrono::duration<double> duration = (end - start) / repeats;
 		output_file << "\t{";
-		output_file << identifier << ", ";
+		output_file << "\"" << identifier << "\", ";
 		print_parameters<0>(param_values);
 		output_file << duration.count();
 		output_file << "},\n";
