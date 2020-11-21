@@ -99,7 +99,9 @@ public:
 	 */
 	template<size_t ParamNr, typename ThisParam>
 	void set_param_range(const std::vector<ThisParam>& range) {
+		num_measurements /= std::get<ParamNr>(param_ranges).size();
 		std::get<ParamNr>(param_ranges) = range;
+		num_measurements *= std::get<ParamNr>(param_ranges).size();
 	}
 
 	/*!
