@@ -16,3 +16,9 @@ project(Nadir VERSION ${NADIR_VERSION_MAJOR}.${NADIR_VERSION_MINOR}.${NADIR_VERS
 add_library(nadir INTERFACE)
 target_include_directories(nadir INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_compile_features(nadir INTERFACE cxx_std_20)
+
+#Examples.
+option(BUILD_EXAMPLES OFF)
+if(BUILD_EXAMPLES)
+    add_subdirectory("example")
+endif()
