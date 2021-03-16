@@ -19,14 +19,25 @@ enum SortDirection { Forward, Backward, COUNT };
  * This is a sorting function that is expected to be more efficient with large
  * data sets, while it may be less efficient with small data sets.
  * \param input A list of numbers that needs to be sorted.
+ * \param direction Ordering in which to sort (increasing or decreasing).
  * \return A sorted list of numbers.
  */
 std::vector<int> sort_nlogn(const std::vector<int>& input, const SortDirection direction);
 
 /*!
+ * Subroutine of the sort_nlogn function, implementing merge sort.
+ * \param left The left half of the input.
+ * \param right The right half of the input.
+ * \param direction Ordering in which to sort (increasing or decreasing).
+ * \return A partially sorted list of output, combining both inputs.
+ */
+std::vector<int> sort_merge(const std::vector<int>& left, const std::vector<int>& right, const SortDirection direction);
+
+/*!
  * This is a sorting function that is expected to be more efficient with small
  * data sets, while it may not scale as well with large data sets.
  * \param input A list of numbers that needs to be sorted.
+ * \param direction Ordering in which to sort (increasing or decreasing).
  * \return A sorted list of numbers.
  */
 std::vector<int> sort_n2(const std::vector<int>& input, const SortDirection direction);

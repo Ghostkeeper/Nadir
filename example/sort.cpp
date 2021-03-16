@@ -9,32 +9,49 @@
 #ifndef SORT
 #define SORT
 
-#include <algorithm> //For std::sort.
-#include <list> //An intentionally slower method of storing data.
+#include <iostream> //DEBUG!
+#include <chrono>
+#include <thread>
 #include "sort.hpp"
 
 namespace example {
 
 std::vector<int> sort_nlogn(const std::vector<int>& input, const SortDirection direction) {
-	//This is an INTENTIONALLY SLOWER sort.
-	//It's slowed down by copying the data to a linked list.
-	//Linked lists are generally slower, and the sorting of linked lists likewise.
-	//What's more, this involves a lot of copying back and forth.
-	//This is necessary to allow the n2 algorithm to beat it at low sizes, for demonstration.
-	//It would otherwise be pretty darn difficult to beat std::sort even at low sizes.
-	std::list<int> list;
-	for(const int& number : input) {
-		list.push_back(number);
+	//We can't use std::sort since that is just way too well optimised such that even my simple insertion sort won't beat it.
+	//So roll our own recursive mergesort here. Quick and dirty. With a lot of data copying, on purpose.
+	if(input.size() <= 1) { //Recursion ends.
+		return input; //Makes a copy!
 	}
+	size_t split_index = input.size() / 2;
+	std::vector<int> left(input.begin(), input.begin() + split_index);
+	std::vector<int> right(input.begin() + split_index, input.end());
+	left = sort_nlogn(left, direction);
+	right = sort_nlogn(right, direction);
+	return sort_merge(left, right, direction);
+}
 
-	list.sort();
-
+std::vector<int> sort_merge(const std::vector<int>& left, const std::vector<int>& right, const SortDirection direction) {
 	std::vector<int> result;
-	for(const int& number : list) {
-		result.push_back(number);
+	result.reserve(left.size() + right.size());
+	const int transform = (direction == SortDirection::Forward) ? 1 : -1; //Multiply all numbers by this to reverse the comparison.
+
+	size_t left_index = 0;
+	size_t right_index = 0;
+	while(left_index < left.size() && right_index < right.size()) {
+		if(left[left_index] * transform < right[right_index] * transform) {
+			result.push_back(left[left_index]);
+			++left_index;
+		} else {
+			result.push_back(right[right_index]);
+			++right_index;
+		}
 	}
-	if(direction == SortDirection::Backward) {
-		std::reverse(result.begin(), result.end());
+	//Now either of the vectors is empty. Append the remaining one completely to the result.
+	for(; left_index < left.size(); ++left_index) {
+		result.push_back(left[left_index]);
+	}
+	for(; right_index < right.size(); ++right_index) {
+		result.push_back(right[right_index]);
 	}
 	return result;
 }
