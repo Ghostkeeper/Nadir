@@ -1,6 +1,6 @@
 /*
  * Strategy pattern optimiser with compile-time linear regression.
- * Copyright (C) 2020 Ghostkeeper
+ * Copyright (C) 2021 Ghostkeeper
  * This library is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for details.
  * You should have received a copy of the GNU Affero General Public License along with this library. If not, see <https://gnu.org/licenses/>.
@@ -33,6 +33,14 @@ template<typename... Param>
 class Benchmarker {
 public:
 	/*!
+	 * The name of the problem we are benchmarking options for.
+	 *
+	 * This will be serialised in the file, so that the application may later
+	 * retrieve multiple different benchmarks in one application.
+	 */
+	std::string problem_name;
+
+	/*!
 	 * How often to repeat each experiment.
 	 *
 	 * More repeats make the measurements more accurate, but also take more time
@@ -49,10 +57,12 @@ public:
 	/*!
 	 * Construct a new benchmark for a certain problem which might have multiple
 	 * algorithms to solve.
+	 * \param problem_name A unique identifier for the problem to which there
+	 * are multiple solutions to choose from.
 	 */
-	Benchmarker() {
+	Benchmarker(const std::string& problem_name) : problem_name(problem_name) {
 		fill_default_ranges<0, Param...>();
-		output_file = std::ofstream(storage_filename);
+		output_file = std::ofstream("bench_" + problem_name + ".hpp");
 		if(!output_file) {
 			exit(1); //Can't open file for writing.
 			return;
@@ -116,7 +126,7 @@ public:
 		std::apply([this](auto&&... ranges) {
 			((this->print_parameter_type(ranges)), ...);
 		}, param_ranges);
-		output_file << "double>, " << num_measurements * options.size() << "> measurements = {\n"; //Measurements are in seconds, floating-point.
+		output_file << "double>, " << num_measurements * options.size() << "> " << problem_name << " = {\n"; //Measurements are in seconds, floating-point.
 
 		for(const std::tuple<std::string, std::function<std::any(Param...)>, std::function<void(std::any, Param...)>>& option : options) {
 			const std::string& identifier = std::get<0>(option);
@@ -133,11 +143,6 @@ public:
 	}
 
 protected:
-	/*!
-	 * File name to store the output measurement data in.
-	 */
-	static constexpr char storage_filename[] = "nadir_benchmarks.hpp"; //TODO: Change to std::string once compiler supports constexpr strings (C++20).
-
 	/*!
 	 * File stream to write the output measurement data into.
 	 */
@@ -348,6 +353,7 @@ protected:
 		print_parameters<0>(param_values);
 		output_file << duration.count();
 		output_file << "},\n";
+		//Prints: \t{"identifier", "p0", "p1", ... , "pN", "<duration>"},\n
 	}
 };
 
