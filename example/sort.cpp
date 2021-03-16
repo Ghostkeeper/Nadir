@@ -9,9 +9,6 @@
 #ifndef SORT
 #define SORT
 
-#include <iostream> //DEBUG!
-#include <chrono>
-#include <thread>
 #include "sort.hpp"
 
 namespace example {
