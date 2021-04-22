@@ -6,12 +6,32 @@
  * You should have received a copy of the GNU Affero General Public License along with this library. If not, see <https://gnu.org/licenses/>.
  */
 
-#ifndef NADIR_NADIR
-#define NADIR_NADIR
+#ifndef NADIR_CHOOSE
+#define NADIR_CHOOSE
 
-//This header collects all symbols from Nadir. This makes it easier to use, not requiring any internal knowledge of Nadir's file layout.
+#include <string_view>
+#include <tuple>
+#include <type_traits>
 
-#include "benchmarker.hpp"
-#include "choose.hpp"
+namespace nadir {
+
+template<
+	std::array Benchmarks,
+	typename... Param
+>
+std::string choose(const std::tuple<Param...>& parameters) {
+	return choose<Benchmarks.size(), Param..., Benchmarks>(parameters);
+}
+
+template<
+	size_t N,
+	typename... Param,
+	std::array<const std::tuple<std::string_view, Param..., double>, N> Data
+>
+std::string choose(const std::tuple<Param...>& parameters) {
+	return "TODO: Implement";
+}
+
+}
 
 #endif
