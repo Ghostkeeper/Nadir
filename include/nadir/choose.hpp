@@ -19,16 +19,16 @@ template<
 	std::array Benchmarks,
 	typename... Param
 >
-std::string choose(const std::tuple<Param...>& parameters) {
-	return choose<Benchmarks.size(), Param..., Benchmarks>(parameters);
+std::string choose(const Param&... parameters) {
+	return choose<Benchmarks.size(), Param..., Benchmarks>(parameters...);
 }
 
 template<
 	size_t N,
 	typename... Param,
-	std::array<const std::tuple<std::string_view, Param..., double>, N> Data
+	std::array<std::tuple<std::string_view, Param..., double>, N> Benchmarks
 >
-std::string choose(const std::tuple<Param...>& parameters) {
+std::string choose(const Param&... parameters) {
 	return "TODO: Implement";
 }
 
